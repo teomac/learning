@@ -24,4 +24,5 @@ class Solution(object):
                 result = result + roman.get(s[i])
                 break
 
+
         return result
