@@ -28,3 +28,34 @@
   (if (null? e)
       (r 0 s)
       (r s (car e))))
+
+; implementation of while construct
+(define (while c b)
+  (when (c)
+    (b)
+    (while c b)))
+
+
+; while function test
+(define (test-while)
+  (define x 0)
+  (while (lambda ()
+           (< x 10))
+         (lambda ()
+           (displayln x)
+           (set! x (+ 1 x)))))
+
+; reverse of a list
+(define (tsil L)
+  (if (null? L)
+      '()
+      (append (tsil (cdr L)) (list (car L)))))
+
+; implementation of flatten method (already present in racket)
+(define (flat L)
+  (if (null? L)
+      '()
+      (append (if (list? (car L))
+                  (flat (car L))
+                  (list (car L)))
+              (flat (cdr L)))))
