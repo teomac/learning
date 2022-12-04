@@ -69,4 +69,4 @@ bmap f (BNode v x y) = BNode (f v) (bmap f x) (bmap f y)
 -- binf :: Integer -> BTree Integer
 binf x = 
     let t = binf (x+1)
-    in BNode x t t 
+    in BNode x t t
