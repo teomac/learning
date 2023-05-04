@@ -15,6 +15,7 @@ for pkt in capture01:
     if(pkt.coap.mid in mids):
         counter += 1
 print(counter)
+
 # questions 1-2
 
 capture = pyshark.FileCapture('challenge2023_1.pcapng', display_filter = "coap.code == DELETE and ip.dst == 134.102.218.18")
