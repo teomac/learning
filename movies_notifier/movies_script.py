@@ -8,8 +8,6 @@ page = requests.get(url)
 
 soup = BeautifulSoup(page.content, "html.parser")
 
-#titles = soup.find_all('td', colspan = 5)
-
 titles1 = soup.select('a[href*="/film/film-in-sala/"]')
 titles2 = soup.select('a[href*="/film/prossime-uscite-film/"]')
 filtered_text1 = [title.text for title in titles1]
