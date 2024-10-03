@@ -1,0 +1,149 @@
+TE-MPE-CB TSC-2024-3 - Coding Exercises
+General guidelines
+Code as you normally would do for a real-life project (so the code is as readable and maintainable as possible).
+You are free to choose the design, file-hierarchy, types, names, etc., and write documentation and tests as you think relevant.
+If the instructions leave out some details, pick a reasonable assumption, state it and proceed.
+Please publish your solutions to a git repository (e.g. Github, GitLab), which we ask you to share with us at the latest on Wednesday 2024/09/25 (25th of September),
+12pm (CEST). We will ask you to eventually un-publish your solutions, so the exercises and your solutions do not end up all over the Internet in time.
+
+First exercise
+Write a function that detects all duplicate elements in a list: given a list of objects, it returns a list that contains only those that are duplicated, 
+in the order that they appeared for the first time in the original list. For example, for the input ["b", "a", "c", "c", "e", "a", "c", "d", "c", "d"], 
+the answer should be ["a", "c", "d"].
+
+You are free to use the standard library but do not use a third-party library which would in practice solve the exercise for you, that is not the point. 
+You may use third party libraries for testing.
+
+You are free to use the language of your choice for this test.
+
+Second Exercise
+Use Java for this exercise.
+You can check online or offline documentation if you wish.
+You’re free to use whatever standard libraries and take advantage from the standard utility methods, such as List, Collections, etc. Don’t use Guava 
+(Google Collections) or other third-party libraries. That’s too easy :)
+Write the code as you normally would for a real-life project. That implies choosing proper names, writing some javadoc, etc.
+Below, you will find a bunch of tests, that describe a simple spreadsheet engine. Write the business code that make all tests pass.
+
+In order to fully work in a TDD (Test Driven Development) way, we strongly encourage you to write only the necessary code to make the tests pass one 
+by one, in order. You will have to make some refactorings along the way, of course. We encourage you to commit at each step, first because it is good practice, 
+second because it will allow us to follow the evolution of your code.
+
+Test suite for second exercise:
+
+/**
+ * Below, you will find a bunch of tests, that describe a simple spreadsheet engine. Write the business code that make
+ * all tests pass.
+ * <p>
+ * In order to fully work in a TDD (Test Driven Development) way, we strongly encourage you to write
+ * only the necessary code to make the tests pass one by one, in order. You will have to make some refactorings along
+ * the way, of course.
+ * <p>
+ * You can find the test suite here: xxx (link to the code below in hastebin.com AND pastee.org)
+ * <p>
+ * Use Java for this exercise.
+ */
+@RunWith(JUnit4.class)
+public class Question {
+    
+    private SpreadsheetImpl sheet;
+    
+    @Before
+    public void setup() {
+        int rows = 10;
+        int columns = 5;
+        sheet = Office.newSpreadsheet(rows, columns);
+    }
+    
+    @Test
+    public void cellsAreEmptyByDefault() {
+        Assert.assertEquals("", sheet.get(0, 0));
+        Assert.assertEquals("", sheet.get(3, 4));
+    }
+    
+    @Test
+    public void cellsAreStored() {
+        sheet.put(1, 2, "foo");
+        Assert.assertEquals("foo", sheet.get(1, 2));
+        
+        sheet.put(3, 3, "bar");
+        Assert.assertEquals("bar", sheet.get(3, 3));
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void cantGetOutOfLimits() {
+        sheet.get(12, 3);
+    }
+    
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void cantPutOutOfLimits() {
+        sheet.put(3, 7, "foo");
+    }
+    
+    @Test
+    public void basicValueTypesAreRecognized() {
+        sheet.put(2, 3, "foo");
+        Assert.assertEquals(ValueType.STRING, sheet.getValueType(2, 3));
+        
+        sheet.put(0, 0, "foo56");
+        Assert.assertEquals(ValueType.STRING, sheet.getValueType(0, 0));
+        
+        sheet.put(5, 2, "12");
+        Assert.assertEquals(ValueType.INTEGER, sheet.getValueType(5, 2));
+        
+        // A value is a formula if and only if the first character is "="
+        sheet.put(1, 1, "= 4 + 8");
+        Assert.assertEquals(ValueType.FORMULA, sheet.getValueType(1, 1));
+        
+        // Formulas are not computed. That means, no need to parse them
+        Assert.assertEquals("= 4 + 8", sheet.get(1, 1));
+    }
+    
+    @Test
+    public void integerCellsAreTrimmed() {
+        sheet.put(1, 1, "     50 ");
+        Assert.assertEquals("50", sheet.get(1, 1));
+        
+        // But string cells stay as they are
+        sheet.put(2, 2, "     foo ");
+        Assert.assertEquals("     foo ", sheet.get(2, 2));
+    }
+    
+    /**
+     * In a more real example, the different representations could perhaps be JSON,
+     * XML, CSV and binary format. But we will use simple export options here.
+     */
+    @Test
+    public void differentExportOptionsAreProvided() {
+        sheet.put(0, 0, "a");
+        sheet.put(1, 1, "b");
+        sheet.put(2, 2, "c");
+        sheet.put(3, 3, "d");
+        sheet.put(3, 4, "e");
+        
+        Assert.assertEquals("10,5#" // Line breaks added for readability. There are no "\n" in the String 
+                + "a-----" // 0
+                + "-b----" // 1
+                + "--c---" // 2
+                + "---d-e-" // 3
+                + "-----" // 4
+                + "-----" // 5
+                + "-----" // 6
+                + "-----" // 7
+                + "-----" // 8
+                + "-----" // 9
+                , new DashSpreadsheetExporter(sheet).export());
+        
+        Assert.assertEquals("10,5#" // Line breaks added for readability. There are no "\n" in the String 
+                + "a*****" // 0
+                + "*b****" // 1
+                + "**c***" // 2
+                + "***d*e*" // 3
+                + "*****" // 4
+                + "*****" // 5
+                + "*****" // 6
+                + "*****" // 7
+                + "*****" // 8
+                + "*****" // 9
+                , new StarSpreadsheetExporter(sheet).export());
+    }
+}
