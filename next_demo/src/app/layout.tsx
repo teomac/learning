@@ -1,13 +1,13 @@
 import './globals.css'
+import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { SessionProvider } from 'next-auth/react'
-import { AuthProvider } from '../lib/providers'
+import Providers from './providers/SessionProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: 'Next.js Auth App',
-  description: 'Authentication app with Google OAuth',
+export const metadata: Metadata = {
+  title: 'NextAuth Google App',
+  description: 'Simple Next.js app with Google authentication',
 }
 
 export default function RootLayout({
@@ -18,9 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   )
