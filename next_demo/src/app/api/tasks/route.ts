@@ -1,5 +1,7 @@
+// src/app/api/tasks/route.ts (Updated POST method)
 import { prisma } from '@/lib/prisma'
 import { getUserSession } from '@/lib/session'
+import { sendPushNotification } from '@/lib/push'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -35,6 +37,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Assignee not found' }, { status: 404 })
     }
 
+    // Get requester info
+    const requester = await prisma.user.findUnique({
+      where: { id: parseInt(user.id) },
+      select: { name: true, email: true }
+    })
+
     // Create the task
     const task = await prisma.task.create({
       data: {
@@ -60,6 +68,18 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+
+    // Send push notification to assignee
+    try {
+      await sendPushNotification(assigneeId, {
+        title: 'New Task Assigned',
+        body: `${requester?.name || requester?.email || 'Someone'} assigned you a new task: ${description.trim()}`,
+        id: task.id.toString()
+      })
+    } catch (notificationError) {
+      console.error('Failed to send push notification:', notificationError)
+      // Don't fail the task creation if notification fails
+    }
 
     return NextResponse.json({
       success: true,

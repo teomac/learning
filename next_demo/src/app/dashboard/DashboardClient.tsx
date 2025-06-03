@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import TaskCreation from './TaskCreation'
 import AssignedTasks from './AssignedTasks'
+import NotificationToggle from '@/components/NotificationToggle'
+
 
 interface DashboardClientProps {
   user: User
@@ -64,13 +66,15 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             <div className="flex items-center">
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
+              {/* Notification Toggle */}
+              <NotificationToggle />
+              
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleProfileClick}
                   className="flex items-center space-x-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
                 >
-
                   <span className="hover:text-blue-600 transition-colors duration-200">{user.name || user.email}</span>
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
