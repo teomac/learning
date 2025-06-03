@@ -39,7 +39,6 @@ const authOption: NextAuthOptions = {
     },
     session,
     async jwt({ token, user, account, profile }) {
-      // Only need this if you want to pass through additional data
       if (profile) {
         const user = await prisma.user.findUnique({
           where: {

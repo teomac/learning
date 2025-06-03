@@ -1,13 +1,11 @@
 'use client'
 
-import { signOut } from 'next-auth/react'
 import { User } from 'next-auth'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import TaskCreation from './TaskCreation'
-import AssignedTasks from './AssignedTasks'
+import TeamSelection from '../dashboard/TeamSelection'
 
-interface DashboardClientProps {
+interface ProfileClientProps {
   user: User
 }
 
@@ -15,11 +13,9 @@ interface ExtendedUser extends User {
   team?: string | null
 }
 
-export default function DashboardClient({ user }: DashboardClientProps) {
-  const [isSigningOut, setIsSigningOut] = useState(false)
+export default function ProfileClient({ user }: ProfileClientProps) {
   const [currentUser, setCurrentUser] = useState<ExtendedUser>(user)
   const [isLoadingTeam, setIsLoadingTeam] = useState(true)
-  const [taskRefreshTrigger, setTaskRefreshTrigger] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
@@ -40,19 +36,12 @@ export default function DashboardClient({ user }: DashboardClientProps) {
     fetchUserTeam()
   }, [])
 
-  const handleSignOut = async () => {
-    setIsSigningOut(true)
-    await signOut({ callbackUrl: '/signin' })
+  const handleTeamUpdate = (newTeam: string) => {
+    setCurrentUser(prev => ({ ...prev, team: newTeam }))
   }
 
-  const handleTaskCreated = () => {
-    // TODO: add here logic for push notifications
-    setTaskRefreshTrigger(prev => prev + 1)
-    console.log('Task created successfully!')
-  }
-
-  const handleProfileClick = () => {
-    router.push('/profile')
+  const handleBackToDashboard = () => {
+    router.push('/dashboard')
   }
 
   return (
@@ -61,44 +50,31 @@ export default function DashboardClient({ user }: DashboardClientProps) {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            </div>
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleProfileClick}
-                  className="flex items-center space-x-3 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                >
-
-                  <span className="hover:text-blue-600 transition-colors duration-200">{user.name || user.email}</span>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </button>
-                {currentUser.team && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                    {currentUser.team}
-                  </span>
-                )}
-              </div>
               <button
-                onClick={handleSignOut}
-                disabled={isSigningOut}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleBackToDashboard}
+                className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
               >
-                {isSigningOut ? 'Signing out...' : 'Sign out'}
+                <svg className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Dashboard
               </button>
             </div>
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-gray-900">User Profile</h1>
+            </div>
+            <div className="w-32"></div> {/* Spacer for centering */}
           </div>
         </div>
       </header>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* Welcome Card */}
+          {/* User Info Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Name Card */}
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
@@ -109,8 +85,8 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Welcome back</dt>
-                      <dd className="text-lg font-medium text-gray-900">{user.name || 'User'}</dd>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Name</dt>
+                      <dd className="text-lg font-medium text-gray-900">{user.name || 'Not set'}</dd>
                     </dl>
                   </div>
                 </div>
@@ -147,7 +123,7 @@ export default function DashboardClient({ user }: DashboardClientProps) {
                   </div>
                   <div className="ml-5 w-0 flex-1">
                     <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Team</dt>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Current Team</dt>
                       <dd className="text-lg font-medium text-gray-900 capitalize">
                         {isLoadingTeam ? (
                           <span className="text-gray-400">Loading...</span>
@@ -162,16 +138,11 @@ export default function DashboardClient({ user }: DashboardClientProps) {
             </div>
           </div>
 
-          {/* Task Creation Form */}
+          {/* Team Selection Component */}
           <div className="mb-8">
-            <TaskCreation onTaskCreated={handleTaskCreated} />
-          </div>
-
-          {/* Assigned Tasks */}
-          <div className="mb-8">
-            <AssignedTasks 
-              userId={user.id || ''}
-              refreshTrigger={taskRefreshTrigger}
+            <TeamSelection 
+              currentTeam={currentUser.team}
+              onTeamUpdate={handleTeamUpdate}
             />
           </div>
         </div>
